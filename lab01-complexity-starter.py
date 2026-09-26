@@ -59,18 +59,20 @@ POW_CALLS = 20_000    # вызовов binary_pow на один замер: ин
 
 def array_sum(a: list[int]) -> int:
     """Сумма элементов массива. Ожидаемая сложность: O(n)."""
+    # TODO: реализовать циклом
     total = 0
-    for x in a:
-        total += x
+    for i in a:
+        total += i
     return total
 
 
 def array_max(a: list[int]) -> int:
     """Максимум массива (массив непуст). Ожидаемая сложность: O(n)."""
+    # TODO: реализовать циклом
     if not a:
         raise ValueError("Массив не должен быть пустым")
     max_val = a[0]
-    for x in a[1:]:
+    for x in a:
         if x > max_val:
             max_val = x
     return max_val
@@ -78,10 +80,10 @@ def array_max(a: list[int]) -> int:
 
 def count_equal_pairs(a: list[int]) -> int:
     """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: O(n^2)."""
+    # TODO: реализовать двойным циклом
     count = 0
-    n = len(a)
-    for i in range(n):
-        for j in range(i + 1, n):
+    for i in range(len(a)):
+        for j in range(i + 1, len(a)):
             if a[i] == a[j]:
                 count += 1
     return count
@@ -92,16 +94,14 @@ def binary_pow(x: int, n: int, mod: int | None = None) -> int:
 
     При заданном mod все умножения выполняются по модулю (результат x**n % mod).
     """
-    if mod is not None and mod == 1:
-        return 0
+    # TODO: реализовать через квадрирование; при mod применять % mod после
+    # каждого умножения
     result = 1
-    base = x % mod if mod is not None else x
-    exp = n
-    while exp > 0:
-        if exp % 2 == 1:
-            result = (result * base) % mod if mod is not None else result * base
-        base = (base * base) % mod if mod is not None else base * base
-        exp //= 2
+    while n != 0:
+        if n % 2 == 1:
+            result = (result * x) % mod if mod is not None else result * x
+        x = (x * x) % mod if mod is not None else x * x
+        n = n // 2
     return result
 
 
@@ -187,6 +187,9 @@ def self_check() -> None:
         x, n = rng.randint(2, 50), rng.randint(0, 64)
         assert binary_pow(x, n, mod=POW_MOD) == pow(x, n, POW_MOD)
 
+    # TODO: добавить собственные проверки инвариантов и описать их в отчёте
+    # (например: count_equal_pairs на массиве из попарно различных элементов = 0).
+
     # Инвариант 1: сумма элементов не меняется от перестановки элементов.
     a = [1, 2, 3, 4, 5]
     assert array_sum(a) == array_sum(a[::-1])
@@ -194,7 +197,7 @@ def self_check() -> None:
     # Инвариант 2: максимум не не меняется от перестановки элементов.
     assert array_max(a) == array_max(a[::-1])
 
-    # Инвариант 3: для массива из различных элементов пар нет.
+    # Инвариант 3: для массива из разных элементов пар нет.
     distinct = [1, 2, 3, 4, 5, 6, 7, 8]
     assert count_equal_pairs(distinct) == 0
 
@@ -322,7 +325,9 @@ def plot_results(results: dict[str, list[tuple[int, float]]], out_dir: Path) -> 
     fig2.savefig(pow_path, dpi=150)
 
     print(f"\nГрафики сохранены:\n  {loglog_path}\n  {pow_path}")
-
+    # TODO: в отчёте объяснить, почему для binary_pow выбраны ЛИНЕЙНЫЕ оси
+    # по log₂ n, а не log-log (какой вид имеет логарифмическая зависимость
+    # в осях log-log и почему по ней трудно судить о порядке роста).
 
 # ---------------------------------------------------------------------------
 
@@ -346,6 +351,8 @@ def main() -> None:
     print("\nНаклон в осях log-log (оценка показателя степени):")
     for name in ("array_sum", "array_max", "count_equal_pairs"):
         print(f"  {name:20s} {log_log_slope(results[name]):.3f}")
+    # TODO: сопоставить наклоны с аналитическими оценками из отчёта
+    # и объяснить расхождения (константы, кэш, накладные расходы интерпретатора).
 
     plot_results(results, args.out)
 
